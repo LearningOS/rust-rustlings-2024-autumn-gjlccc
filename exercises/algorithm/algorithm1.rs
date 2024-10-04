@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -29,13 +29,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: std::cmp::PartialOrd> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -72,12 +72,44 @@ impl<T> LinkedList<T> {
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut list_c = LinkedList::new();
+        let mut add = |node| {
+            list_c.length += 1;
+            if list_c.end.is_none() {
+                list_c.start = Some(node);
+            }   else {
+                unsafe { (*list_c.end.unwrap().as_mut()).next = Some(node) };
+            }
+            list_c.end = Some(node);
+        };
+        let mut node_a = list_a.start;
+        let mut node_b = list_b.start;
+        while node_a.is_some() && node_b.is_some() {
+            let val_a = unsafe { &node_a.unwrap().as_ref().val };
+            let val_b = unsafe { &node_b.unwrap().as_ref().val };
+            if val_a < val_b {
+                add(node_a.unwrap());
+                node_a = unsafe { node_a.unwrap().as_ref().next };
+            } else {
+                add(node_b.unwrap());
+                node_b = unsafe { node_b.unwrap().as_ref().next };
+            }
         }
+        while node_a.is_some() {
+            add(node_a.unwrap());
+            node_a = unsafe { node_a.unwrap().as_ref().next };
+        }
+        while node_b.is_some() {
+            add(node_b.unwrap());
+            node_b = unsafe { node_b.unwrap().as_ref().next };
+        }
+        list_c
+
+    
+
+        
 	}
+
 }
 
 impl<T> Display for LinkedList<T>

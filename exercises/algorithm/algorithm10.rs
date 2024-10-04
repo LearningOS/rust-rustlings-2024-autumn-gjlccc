@@ -2,7 +2,7 @@
 	graph
 	This problem requires you to implement a basic graph functio
 */
-// I AM NOT DONE
+
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -30,6 +30,32 @@ impl Graph for UndirectedGraph {
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
         //TODO
+        let (from_node, to_node, weight) = edge;
+        if!self.contains(from_node) {
+            self.add_node(from_node);
+        }
+        if!self.contains(to_node) {
+            self.add_node(to_node);
+        }
+        let from_node_neighbours = self.adjacency_table_mutable().entry(from_node.to_string()).or_insert(Vec::new());
+        from_node_neighbours.push((to_node.to_string(), weight));
+        let to_node_neighbours = self.adjacency_table_mutable().entry(to_node.to_string()).or_insert(Vec::new());
+        to_node_neighbours.push((from_node.to_string(), weight));
+    }
+    fn contains(&self, node: &str) -> bool {
+        self.adjacency_table().get(node).is_some()
+    }
+    fn nodes(&self) -> HashSet<&String> {
+        self.adjacency_table().keys().collect()
+    }
+    fn edges(&self) -> Vec<(&String, &String, i32)> {
+        let mut edges = Vec::new();
+        for (from_node, from_node_neighbours) in self.adjacency_table() {
+            for (to_node, weight) in from_node_neighbours {
+                edges.push((from_node, to_node, *weight));
+            }
+        }
+        edges
     }
 }
 pub trait Graph {
@@ -38,10 +64,25 @@ pub trait Graph {
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
     fn add_node(&mut self, node: &str) -> bool {
         //TODO
-		true
+        if self.contains(node) {
+            return false;
+        }
+        self.adjacency_table_mutable().insert(node.to_string(), Vec::new());
+        true
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
         //TODO
+        let (from_node, to_node, weight) = edge;
+        if!self.contains(from_node) {
+            self.add_node(from_node);
+        }
+        if!self.contains(to_node) {
+            self.add_node(to_node);
+        }
+        let from_node_neighbours = self.adjacency_table_mutable().entry(from_node.to_string()).or_insert(Vec::new());
+        from_node_neighbours.push((to_node.to_string(), weight));
+        let to_node_neighbours = self.adjacency_table_mutable().entry(to_node.to_string()).or_insert(Vec::new());
+        to_node_neighbours.push((from_node.to_string(), weight));
     }
     fn contains(&self, node: &str) -> bool {
         self.adjacency_table().get(node).is_some()
